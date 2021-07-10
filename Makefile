@@ -1,6 +1,6 @@
 colon := :
 $(colon) := :
-IMAGE_NAME ?= hg2c/canal-adapter$(:)v1.1.5-3
+IMAGE_NAME ?= easi/canal-adapter$(:)v1.1.5-6
 
 build:
 	docker build -t $(IMAGE_NAME) .
@@ -14,8 +14,11 @@ run:
 
 bash:
 	docker run -it --rm \
+		--env="canal.instance.master.address=prod-delivery-mirror.cluster-czmlu1dglm0q.ap-northeast-1.rds.amazonaws.com:3306" \
+		--env="canal.instance.database=easi_delivery" \
+		--env="canal.instance.dbUsername=cdc" \
+		--env="canal.instance.dbPassword=FOOBAR" \
 		--env="canal.destinations=cdc" \
-		--env="cdc.mysql.jdbc.url=jdbc:mysql://hg2c.rds.amazonaws.com:3306/?useUnicode=true&characterEncoding=utf-8&enabledTLSProtocols=TLSv1.2" \
 		--env="cdc.mysql.jdbc.username=cdc" \
 		--env="cdc.mysql.jdbc.password=test" \
 		--env="cdc.mysql.jdbc.database=cdc" \
