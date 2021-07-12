@@ -11,7 +11,10 @@ RUN \
     yum clean all && \
     true
 
+RUN wget -nv -P /opt/canal-adapter/lib/ https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar
+
 COPY app.sh /app.sh
+COPY application.yml /opt/canal-adapter/conf/application.yml
 
 WORKDIR /opt/canal-adapter
 CMD [ "/app.sh" ]

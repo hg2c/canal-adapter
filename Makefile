@@ -1,6 +1,6 @@
 colon := :
 $(colon) := :
-IMAGE_NAME ?= easi/canal-adapter$(:)v1.1.5-6
+IMAGE_NAME ?= easi/canal-adapter$(:)v1.1.5-18
 
 build:
 	docker build -t $(IMAGE_NAME) .
@@ -19,6 +19,7 @@ bash:
 		--env="canal.instance.dbUsername=cdc" \
 		--env="canal.instance.dbPassword=FOOBAR" \
 		--env="canal.destinations=cdc" \
+		--env="cdc.mysql.jdbc.url=jdbc:cdc" \
 		--env="cdc.mysql.jdbc.username=cdc" \
 		--env="cdc.mysql.jdbc.password=test" \
 		--env="cdc.mysql.jdbc.database=cdc" \

@@ -19,42 +19,48 @@ CDC_MYSQL_JDBC_URL=$(perl -le 'print $ENV{"cdc.mysql.jdbc.url"}')
 CANAL_TCP_SERVER_HOST=$(perl -le 'print $ENV{"canal.tcp.server.host"} || "127.0.0.1:11111"')
 sed -i "s/    canal.tcp.server.host: .*/    canal.tcp.server.host: ${CANAL_TCP_SERVER_HOST}/" $BASE/conf/application.yml
 
-sed -i "s|#  srcDataSources:|  srcDataSources:|" $BASE/conf/application.yml
-sed -i "s|#    defaultDS:|    defaultDS:|" $BASE/conf/application.yml
-sed -i "s|#      url: jdbc:mysql://127.0.0.1:3306/mytest?useUnicode=true|      url: jdbc:mysql://${CANAL_INSTANCE_MASTER_ADDRESS}/${CANAL_INSTANCE_DATABASE}?useUnicode=true\&characterEncoding=utf-8\&enabledTLSProtocols=TLSv1.2|" $BASE/conf/application.yml
-sed -i "s|#      username: root|      username: ${CANAL_INSTANCE_USERNAME}|" $BASE/conf/application.yml
-sed -i "s|#      password: 121212|      password: ${CANAL_INSTANCE_PASSWORD}|" $BASE/conf/application.yml
+# sed -i "s|#  srcDataSources:|  srcDataSources:|" $BASE/conf/application.yml
+# sed -i "s|#    defaultDS:|    defaultDS:|" $BASE/conf/application.yml
+# sed -i "s|#      url: jdbc:mysql://127.0.0.1:3306/mytest?useUnicode=true|      url: \"jdbc:mysql://${CANAL_INSTANCE_MASTER_ADDRESS}/${CANAL_INSTANCE_DATABASE}?useUnicode=true\&characterEncoding=utf-8\&enabledTLSProtocols=TLSv1.2\"|" $BASE/conf/application.yml
+# sed -i "s|#      username: root|      username: \"${CANAL_INSTANCE_USERNAME}\"|" $BASE/conf/application.yml
+# sed -i "s|#      password: 121212|      password: \"${CANAL_INSTANCE_PASSWORD}\"|" $BASE/conf/application.yml
 
 if [ ! -z "$CDC_MYSQL_JDBC_URL" ] ; then
     echo "enable mysql cdc!"
+    CDC_MYSQL_JDBC_DRIVER=$(perl -le 'print $ENV{"cdc.mysql.jdbc.driver"}')
     CDC_MYSQL_JDBC_USERNAME=$(perl -le 'print $ENV{"cdc.mysql.jdbc.username"}')
     CDC_MYSQL_JDBC_PASSWORD=$(perl -le 'print $ENV{"cdc.mysql.jdbc.password"}')
     CDC_MYSQL_JDBC_DATABASE=$(perl -le 'print $ENV{"cdc.mysql.jdbc.database"}')
 
     sed -i "s/  - instance: .*/  - instance: ${CANAL_DESTINATIONS}/" $BASE/conf/application.yml
-    cat <<EOF>> $BASE/conf/application.yml
 
+    cat <<EOF>> $BASE/conf/application.yml
       - name: rdb
-        key: mysql
+        key: mysql1
         properties:
-          jdbc.driverClassName: com.mysql.jdbc.Driver
-          jdbc.url: ${CDC_MYSQL_JDBC_URL}
-          jdbc.username: ${CDC_MYSQL_JDBC_USERNAME}
-          jdbc.password: ${CDC_MYSQL_JDBC_PASSWORD}
+          jdbc.driverClassName: "${CDC_MYSQL_JDBC_DRIVER}"
+          jdbc.url: "${CDC_MYSQL_JDBC_URL}"
+          jdbc.username: "${CDC_MYSQL_JDBC_USERNAME}"
+          jdbc.password: "${CDC_MYSQL_JDBC_PASSWORD}"
 EOF
 
-    rm $BASE/conf/rdb/mytest_user.yml
-    cat <<EOF> $BASE/conf/rdb/cdc.yml
+    # rm $BASE/conf/rdb/mytest_user.yml
+    cat <<EOF> $BASE/conf/rdb/mytest_user.yml
 dataSourceKey: defaultDS
 destination: ${CANAL_DESTINATIONS}
 groupId: g1
-outerAdapterKey: mysql
+outerAdapterKey: mysql1
 concurrent: true
 dbMapping:
   mirrorDb: true
   database: ${CDC_MYSQL_JDBC_DATABASE}
 EOF
 fi
+
+echo ---
+cat $BASE/conf/application.yml
+echo ---
+cat $BASE/conf/rdb/mytest_user.yml
 
 ## set java path
 if [ -z "$JAVA" ] ; then
