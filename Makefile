@@ -1,6 +1,6 @@
 colon := :
 $(colon) := :
-IMAGE_NAME ?= easi/canal-adapter$(:)v1.1.5-28
+IMAGE_NAME ?= easi/canal-adapter$(:)v1.1.5-30
 
 build:
 	docker build -t $(IMAGE_NAME) .
@@ -14,15 +14,18 @@ run:
 
 bash:
 	docker run -it --rm \
-		--env="canal.instance.master.address=mirror.ap-northeast-1.rds.amazonaws.com:3306" \
-		--env="canal.instance.database=easi_delivery" \
-		--env="canal.instance.dbUsername=cdc" \
-		--env="canal.instance.dbPassword=FOOBAR" \
-		--env="canal.destinations=cdc" \
-		--env="cdc.mysql.jdbc.url=jdbc:cdc" \
-		--env="cdc.mysql.jdbc.username=cdc" \
-		--env="cdc.mysql.jdbc.password=test" \
-		--env="cdc.mysql.jdbc.database=cdc" \
+		--env="CDC_INSTANCE=cdc" \
+		--env="CDC_MASTER_ADDRESS=prod.rds.amazonaws.com:3306" \
+		--env="CDC_MASTER_DATABASE=easi_delivery" \
+		--env="CDC_MASTER_USERNAME=cdcuser" \
+		--env="CDC_MASTER_PASSWORD=cdcpass" \
+		--env="CDC_INSTANCE_FILTER_REGEX=easi_delivery\\\\..*" \
+		--env="CDC_MASTER_JOURNAL_NAME=mysql-bin-changelog.000061" \
+		--env="CDC_MASTER_JOURNAL_POSITION=4771748" \
+		--env="CDC_SLAVE_URL=jdbc:cdc" \
+		--env="CDC_SLAVE_DATABASE=easi_delivery" \
+		--env="CDC_SLAVE_USERNAME=cdcuser" \
+		--env="CDC_SLAVE_PASSWORD=cdcpass" \
 		-v $(CURDIR)/app.sh:/app.sh \
 		$(IMAGE_NAME) bash
 

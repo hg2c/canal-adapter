@@ -2,9 +2,12 @@
 
 export LANG=en_US.UTF-8
 
-if [ -z "$BASE" ] ; then
-    BASE=/opt/canal-adapter
-fi
+BASE=/opt/canal-adapter
+
+CDC_MASTER_CANAL=${CDC_MASTER_CANAL:-127.0.0.1:11111}
+CDC_INSTANCE=${CDC_INSTANCE:-cdc}
+
+CDC_SLAVE_JDBC_DRIVER=${CDC_SLAVE_JDBC_DRIVER:-org.mariadb.jdbc.Driver}
 
 sed -i "s/    canal.tcp.server.host: .*/    canal.tcp.server.host: ${CDC_MASTER_CANAL}/" $BASE/conf/application.yml
 
@@ -15,11 +18,12 @@ sed -i "s/    canal.tcp.server.host: .*/    canal.tcp.server.host: ${CDC_MASTER_
 # sed -i "s|#      password: 121212|      password: \"${CDC_MASTER_PASSWORD}\"|" $BASE/conf/application.yml
 
 if [ ! -z "$CDC_SLAVE_URL" ] ; then
-    echo "enable mysql cdc!"
+    echo "enable rdb adapter!"
     sed -i "s/  - instance: .*/  - instance: ${CDC_INSTANCE}/" $BASE/conf/application.yml
     cat <<EOF>> $BASE/conf/application.yml
+
       - name: rdb
-        key: mysql1
+        key: cdc
         properties:
           jdbc.driverClassName: "${CDC_SLAVE_JDBC_DRIVER}"
           jdbc.url: "${CDC_SLAVE_URL}"
@@ -27,12 +31,12 @@ if [ ! -z "$CDC_SLAVE_URL" ] ; then
           jdbc.password: "${CDC_SLAVE_PASSWORD}"
 EOF
 
-    # rm $BASE/conf/rdb/mytest_user.yml
-    cat <<EOF> $BASE/conf/rdb/mytest_user.yml
+    rm $BASE/conf/rdb/mytest_user.yml
+    cat <<EOF> $BASE/conf/rdb/cdc.yml
 dataSourceKey: defaultDS
 destination: ${CDC_INSTANCE}
 groupId: g1
-outerAdapterKey: mysql1
+outerAdapterKey: cdc
 concurrent: true
 dbMapping:
   mirrorDb: true
@@ -43,7 +47,7 @@ fi
 echo ---
 cat $BASE/conf/application.yml
 echo ---
-cat $BASE/conf/rdb/mytest_user.yml
+cat $BASE/conf/rdb/cdc.yml
 
 ## set java path
 if [ -z "$JAVA" ] ; then
@@ -65,6 +69,8 @@ for i in $BASE/lib/*;
 done
 
 CLASSPATH="$BASE/conf:$CLASSPATH";
+
+cd $BASE/bin
 
 # echo CLASSPATH :$CLASSPATH
 $JAVA $JAVA_OPTS $JAVA_DEBUG_OPT $ADAPTER_OPTS -classpath .:$CLASSPATH com.alibaba.otter.canal.adapter.launcher.CanalAdapterApplication
