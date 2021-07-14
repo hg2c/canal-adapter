@@ -14,7 +14,7 @@ run:
 
 bash:
 	docker run -it --rm \
-		--env="canal.instance.master.address=prod-delivery-mirror.cluster-czmlu1dglm0q.ap-northeast-1.rds.amazonaws.com:3306" \
+		--env="canal.instance.master.address=mirror.ap-northeast-1.rds.amazonaws.com:3306" \
 		--env="canal.instance.database=easi_delivery" \
 		--env="canal.instance.dbUsername=cdc" \
 		--env="canal.instance.dbPassword=FOOBAR" \
