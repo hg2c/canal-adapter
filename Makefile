@@ -1,6 +1,6 @@
 colon := :
 $(colon) := :
-IMAGE_NAME ?= easi/canal-adapter$(:)v1.1.5-20
+IMAGE_NAME ?= easi/canal-adapter$(:)v1.1.5-28
 
 build:
 	docker build -t $(IMAGE_NAME) .

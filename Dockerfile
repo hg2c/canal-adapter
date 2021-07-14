@@ -12,6 +12,8 @@ RUN wget -nv -P /opt/canal-adapter/lib/ https://downloads.mariadb.com/Connectors
 
 COPY app.sh /app.sh
 COPY application.yml /opt/canal-adapter/conf/application.yml
+# COPY logback.xml /opt/canal-adapter/conf/logback.xml
+# RUN mkdir -p /opt/canal-adapter/logs/adapter
 
-WORKDIR /opt/canal-adapter
+WORKDIR /opt/canal-adapter/bin
 CMD [ "/app.sh" ]
