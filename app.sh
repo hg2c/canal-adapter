@@ -17,6 +17,10 @@ sed -i "s/    canal.tcp.server.host: .*/    canal.tcp.server.host: ${CDC_MASTER_
 # sed -i "s|#      username: root|      username: \"${CDC_MASTER_USERNAME}\"|" $BASE/conf/application.yml
 # sed -i "s|#      password: 121212|      password: \"${CDC_MASTER_PASSWORD}\"|" $BASE/conf/application.yml
 
+if [ -z "$CDC_LOG" ] ; then
+    sed -i "s/      - name: logger/#      - name: logger/" $BASE/conf/application.yml
+fi
+
 if [ ! -z "$CDC_SLAVE_URL" ] ; then
     echo "enable rdb adapter!"
     sed -i "s/  - instance: .*/  - instance: ${CDC_INSTANCE}/" $BASE/conf/application.yml
