@@ -11,11 +11,13 @@ CDC_SLAVE_JDBC_DRIVER=${CDC_SLAVE_JDBC_DRIVER:-org.mariadb.jdbc.Driver}
 
 sed -i "s/    canal.tcp.server.host: .*/    canal.tcp.server.host: ${CDC_MASTER_CANAL}/" $BASE/conf/application.yml
 
-# sed -i "s|#  srcDataSources:|  srcDataSources:|" $BASE/conf/application.yml
-# sed -i "s|#    defaultDS:|    defaultDS:|" $BASE/conf/application.yml
-# sed -i "s|#      url: jdbc:mysql://127.0.0.1:3306/mytest?useUnicode=true|      url: \"jdbc:mysql://${CDC_MASTER_ADDRESS}/${CDC_MASTER_DATABASE}?useUnicode=true\&characterEncoding=utf-8\&enabledTLSProtocols=TLSv1.2\"|" $BASE/conf/application.yml
-# sed -i "s|#      username: root|      username: \"${CDC_MASTER_USERNAME}\"|" $BASE/conf/application.yml
-# sed -i "s|#      password: 121212|      password: \"${CDC_MASTER_PASSWORD}\"|" $BASE/conf/application.yml
+if [ ! -z "$CDC_MASTER_URL" ] ; then
+    sed -i "s|#  srcDataSources:|  srcDataSources:|" $BASE/conf/application.yml
+    sed -i "s|#    defaultDS:|    defaultDS:|" $BASE/conf/application.yml
+    sed -i "s|#      url: jdbc:mysql://127.0.0.1:3306/mytest?useUnicode=true|      url: \"${CDC_MASTER_URL}\"|" $BASE/conf/application.yml
+    sed -i "s|#      username: root|      username: \"${CDC_MASTER_USERNAME}\"|" $BASE/conf/application.yml
+    sed -i "s|#      password: 121212|      password: \"${CDC_MASTER_PASSWORD}\"|" $BASE/conf/application.yml
+fi
 
 if [ -z "$CDC_LOG" ] ; then
     sed -i "s/      - name: logger/#      - name: logger/" $BASE/conf/application.yml
