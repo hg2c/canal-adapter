@@ -7,17 +7,10 @@ BASE=/opt/canal-adapter
 CDC_MASTER_CANAL=${CDC_MASTER_CANAL:-127.0.0.1:11111}
 CDC_INSTANCE=${CDC_INSTANCE:-cdc}
 
+CDC_MASTER_JDBC_DRIVER=${CDC_MASTER_JDBC_DRIVER:-org.mariadb.jdbc.Driver}
 CDC_SLAVE_JDBC_DRIVER=${CDC_SLAVE_JDBC_DRIVER:-org.mariadb.jdbc.Driver}
 
 sed -i "s/    canal.tcp.server.host: .*/    canal.tcp.server.host: ${CDC_MASTER_CANAL}/" $BASE/conf/application.yml
-
-if [ ! -z "$CDC_MASTER_URL" ] ; then
-    sed -i "s|#  srcDataSources:|  srcDataSources:|" $BASE/conf/application.yml
-    sed -i "s|#    defaultDS:|    defaultDS:|" $BASE/conf/application.yml
-    sed -i "s|#      url: jdbc:mysql://127.0.0.1:3306/mytest?useUnicode=true|      url: \"${CDC_MASTER_URL}\"|" $BASE/conf/application.yml
-    sed -i "s|#      username: root|      username: \"${CDC_MASTER_USERNAME}\"|" $BASE/conf/application.yml
-    sed -i "s|#      password: 121212|      password: \"${CDC_MASTER_PASSWORD}\"|" $BASE/conf/application.yml
-fi
 
 if [ -z "$CDC_LOG" ] ; then
     sed -i "s/      - name: logger/#      - name: logger/" $BASE/conf/application.yml
@@ -47,6 +40,20 @@ concurrent: true
 dbMapping:
   mirrorDb: true
   database: ${CDC_SLAVE_DATABASE}
+EOF
+fi
+
+if [ ! -z "$CDC_MASTER_URL" ] ; then
+    echo "enable srcDataSources!"
+
+    cat <<EOF>> $BASE/conf/application.yml
+
+  srcDataSources:
+    defaultDS:
+      driver: "${CDC_MASTER_JDBC_DRIVER}"
+      url: "${CDC_MASTER_URL}"
+      username: "${CDC_MASTER_USERNAME}"
+      password: "${CDC_MASTER_PASSWORD}"
 EOF
 fi
 
